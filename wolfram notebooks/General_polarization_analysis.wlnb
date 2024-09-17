@@ -1,0 +1,830 @@
+{
+ "cells": [
+  {
+   "kind": 1,
+   "value": "",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "ClearAll[\"Global`*\"]\nSymbols = {Rx, Ry, Rz, A1, A2, A3, B1, B2, B3, Tx, Ty, Tz, η0, k0, θ, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi, L,φ}\nfilePath = \"/home/dimner/Desktop/ΔΙΠΛΩΜΑΤΙΚΗ/results_analytical\";\n\nσ1xi=0\n(*assume two infinite metasurfaces in the xy plane. We will now define the surface conductivity tensors*)\nσ1 = {{σ1xr + I σ1xi, 0, 0}, {0, σ1yr + I σ1yi, 0}, {0, 0, 0}};\nσ2 = {{σ1xr + I σ1xi, 0, 0}, {0, σ1yr + I σ1yi, 0}, {0, 0, 0}};\n(*now define 2 rotation matrices to rotate the tensors, the angles must be in φ1 and φ2*)\nR1 = {{Cos[φ1], -Sin[φ1], 0}, {Sin[φ1], Cos[φ1], 0}, {0, 0, 1}};\nR2 = {{Cos[φ2], -Sin[φ2], 0}, {Sin[φ2], Cos[φ2], 0}, {0, 0, 1}};\n(*now rotate the tensors*)\nσ1 = FullSimplify[R1.σ1.Transpose[R1]];\nσ2 = FullSimplify[R2.σ2.Transpose[R2]];\n(*print it as a matrix*)\nMatrixForm[σ1]\nMatrixForm[σ2]\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><w>Rx</w><w>,</w><w>Ry</w><w>,</w><w>Rz</w><w>,</w><w>A1</w><w>,</w><w>A2</w><w>,</w><w>A3</w><w>,</w><w>B1</w><w>,</w><w>B2</w><w>,</w><w>B3</w><w>,</w><w>Tx</w><w>,</w><w>Ty</w><w>,</w><w>Tz</w><w>,</w><w>η0</w><w>,</w><w>k0</w><w>,</w><w>θ</w><w>,</w><w>φ1</w><w>,</w><w>φ2</w><w>,</w><w>σ1xr</w><w>,</w><w>σ1xi</w><w>,</w><w>σ1yr</w><w>,</w><w>σ1yi</w><w>,</w><w>L</w><w>,</w><w>φ</w></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{Rx, Ry, Rz, A1, A2, A3, B1, B2, B3, Tx, Ty, Tz, η0, k0, θ, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi, L, φ}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d42c8a70-07cb-48f0-9332-467e5c4e057c",
+     "metadata": {
+      "cellLabel": "Out[370]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>(</wb><w>⁠</w><wgrid style=\"grid-template-columns:repeat(3,max-content);\"><w><wrow><w></w><wrow><w></w><w>σ1xr</w><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>σ1xr</w><w>-</w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow></wrow></w><w><w>0</w></w><w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>σ1xr</w><w>-</w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow></wrow></w><w><wrow><w></w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><w>σ1xr</w><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w>0</w></w><w><w>0</w></w><w><w>0</w></w><w><w>0</w></w></wgrid><w>⁠</w><wb>)</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "MatrixForm[{{σ1xr*Cos[φ1]^2 + (I*σ1yi + σ1yr)*Sin[φ1]^2, (σ1xr - I*σ1yi - σ1yr)*Cos[φ1]*Sin[φ1], 0}, {(σ1xr - I*σ1yi - σ1yr)*Cos[φ1]*Sin[φ1], (I*σ1yi + σ1yr)*Cos[φ1]^2 + σ1xr*Sin[φ1]^2, 0}, {0, 0, 0}}]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "baeeb528-53d7-4f24-83f2-059b79c9c1be",
+     "metadata": {
+      "cellLabel": "Out[379]//MatrixForm= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>(</wb><w>⁠</w><wgrid style=\"grid-template-columns:repeat(3,max-content);\"><w><wrow><w></w><wrow><w></w><w>σ2xr</w><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w><w>+</w><w>σ2xr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow></wrow></w><w><w>0</w></w><w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w><w>+</w><w>σ2xr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow></wrow></w><w><wrow><w></w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><w>σ2xr</w><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w>0</w></w><w><w>0</w></w><w><w>0</w></w><w><w>0</w></w></wgrid><w>⁠</w><wb>)</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "MatrixForm[{{σ2xr*Cos[φ2]^2 + (I*σ1yi + σ1yr)*Sin[φ2]^2, ((-I)*σ1yi - σ1yr + σ2xr)*Cos[φ2]*Sin[φ2], 0}, {((-I)*σ1yi - σ1yr + σ2xr)*Cos[φ2]*Sin[φ2], (I*σ1yi + σ1yr)*Cos[φ2]^2 + σ2xr*Sin[φ2]^2, 0}, {0, 0, 0}}]",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "2ebf04e6-e3cb-4052-9f64-37519ccdab82",
+     "metadata": {
+      "cellLabel": "Out[380]//MatrixForm= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1724325077170,
+     "endTime": 1724325078029
+    },
+    "executionOrder": 369,
+    "success": true
+   }
+  },
+  {
+   "kind": 1,
+   "value": "The electric field for a general polarization mode is:\n$$\n\\mathbf{E}_{\\text{inc}}(x,z) = E_0 \\left( \\cos\\phi \\cdot \\hat{y} + \\sin\\phi \\left( \\cos\\theta \\, \\hat{x} - \\sin\\theta \\, \\hat{z} \\right) \\right) e^{-i k_0 (x \\sin\\theta + z \\cos\\theta)}\n$$\nwhere φ  is the angle between the TE mode and the general polarization . For the TE mode, φ = 0. For the TM mode, φ = π/2.\n\n\nThe transmitted electric field is:\n\n$$\n\\mathbf{E}_{\\text{trans}}(x, y, z) = \\left(T_x \\hat{x} + T_y \\hat{y} + T_z \\hat{z}\\right) e^{-i k_0 (\\sin\\theta x + \\cos\\theta z)}\n$$\n\nTo show that the field components and the wave vector are perpendicular, we use the condition:\n\n$$\n\\mathbf{k^{+}} \\cdot \\mathbf{E}_{\\text{trans}} = 0\n$$\n\nSolving for $T_z$ gives:\n\n$$\nT_z = T_x \\tan(\\theta)\n$$\n\nWe do the same for all the other fields, reflected and the fields between the two metasurfaces.\n",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "\n(* ClearAll[\"Global`*\"] *)\n(*now lets define the magnetic and electric field. Assume oblique incidence to the first metasurface.*)\n\nkf={Sin[θ],0,Cos[θ]};      (*forward direction of propagation*)\nkb={Sin[θ],0,-Cos[θ]};     (*backward direction of propagation*)\nE0=1;                      (*amplitude of the electric field*) \n\n(*initialize an association to store the z components of the electric field*)\nzComponents = <||>;\n\n\n(*φ is the angle between the general field and the TE mode*)\nE1inc[x_, z_] := \n  E0 * (Cos[φ] * {0, 1, 0} + Sin[φ] * {Cos[θ], 0, -Sin[θ]}) * Exp[-I k0 * kf.{x, y, z}];\nE1inc[x,z]\nH1inc[x_,  z_] := FullSimplify[(1/η0)*Cross[kf,E1inc[x,z]]];    (*incident magnetic field*)\nH1inc[x,z]\n\nE1refld[x_,  z_] := E0*{Rx, Ry, Rz}*Exp[-I k0 kb.{x,y,z}];   (*reflected electric field dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kb.E1refld[x,z]/.Exp[-I k0 kb.{x,y,z}]->1;               (*equation for the orthogonality of the electric field with the k vector*)\nRd=Solve[eqq1==0,Rz][[1]][[1]][[2]];                          (*solve for Rz*)\nzComponents[\"Rz\"] = ToString[Rd,InputForm];\nE1refl[x_,z_]:=FullSimplify[E1refld[x,z]/.Rz->Rd]     (*substitute Rz in the electric field*)\nE1refl[x,z]\n\nH1refl[x_,  z_] := FullSimplify[(1/η0)*Cross[kb,E1refl[x,z]]];  (*reflected magnetic field*)\nH1refl[x,z]\nE1[x_,  z_] := E1inc[x, z] + E1refl[x, z];  (*total electric field*)\nH1[x_,  z_] := H1inc[x,  z] + H1refl[x,z];  (*total magnetic field*)\nE1[x,z]\nH1[x,z]\n\n\n(* AREA 2 LEFT OF THE FIRST METASURFACE *)\nE2fd[x_,  z_] := {A1,A2,A3}*Exp[-I k0 kf.{x,y,z}];       (* electric field in the forward direction dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kf.E2fd[x,z]/.Exp[-I k0 kf.{x,y,z}]->1;\nAd=Solve[eqq1==0,A3][[1]][[1]][[2]];\nzComponents[\"A3\"] = ToString[Ad,InputForm];\nE2f[x_,z_]:=FullSimplify[E2fd[x,z]/.A3->Ad]    \nE2bd[x_,  z_] := {B1,B2,B3}*Exp[-I k0 kb.{x,y,z}];       (*electric field in the backward direction dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kb.E2bd[x,z]/.Exp[-I k0 kb.{x,y,z}]->1;          \nBd=Solve[eqq1==0,B3][[1]][[1]][[2]];\nzComponents[\"B3\"] = ToString[Bd,InputForm];   \nE2b[x_,z_]:=FullSimplify[E2bd[x,z]/.B3->Bd]     \nE2[x_,  z_] := E2f[x, z] + E2b[x, z];                                                               \nE2[x,z]\nH2[x_,  z_] := FullSimplify[(1/η0)*Cross[kf,E2f[x, z]]] + FullSimplify[(1/η0)*Cross[kb,E2b[x, z]]];   \nH2[x,z]\n\n\n(*AREA 3 RIGHT OF THE SECOND METASURFACE*)\nE3d[x_,  z_] := {Tx,Ty,Tz}*Exp[-I k0 kf.{x,y,z}];  (*transmitted electric field dummy*)\neqq1=kf.E3d[x,z]/.Exp[-I k0 kf.{x,y,z}]->1;\nTd=Solve[eqq1==0,Tz][[1]][[1]][[2]];\nzComponents[\"Tz\"] = ToString[Td,InputForm];\nE3[x_,z_]:=FullSimplify[E3d[x,z]/.Tz->Td]\nH3[x_,z_] := FullSimplify[(1/η0)*Cross[kf,E3[x,z]]];\nE3[x,z]\nH3[x,z]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(Cos[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), Cos[φ]/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), -((Sin[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "41050c4c-4049-4032-a759-ad8e6e475204",
+     "metadata": {
+      "cellLabel": "Out[386]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{-((Cos[θ]*Cos[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)), Sin[φ]/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (Cos[φ]*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "ea57c8ae-d2a6-4090-bf84-d06a897a57bf",
+     "metadata": {
+      "cellLabel": "Out[388]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx, E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry, E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Tan[θ]}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "884fb7a3-b4b3-43f0-a0af-de62a70fa6e0",
+     "metadata": {
+      "cellLabel": "Out[394]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Cos[θ])/η0, -((E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Sec[θ])/η0), (E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Sin[θ])/η0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "a26b121f-027f-49e4-a0b5-3ea83cbe01df",
+     "metadata": {
+      "cellLabel": "Out[396]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx + (Cos[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry + Cos[φ]/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), -((Sin[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ]))) + E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Tan[θ]}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d9606f2b-fd6d-4e95-b88b-b65954701723",
+     "metadata": {
+      "cellLabel": "Out[399]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>+</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Cos[θ])/η0 - (Cos[θ]*Cos[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), -((E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Sec[θ])/η0) + Sin[φ]/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Sin[θ])/η0 + (Cos[φ]*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "f27f105d-7e03-4bab-aee7-a06cacd24a82",
+     "metadata": {
+      "cellLabel": "Out[400]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w>+</w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w>+</w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ])) + A1/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ])) + A2/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Tan[θ] - (A1*Tan[θ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ]))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "1b8b003f-1fbd-43e7-951a-176edefb78fc",
+     "metadata": {
+      "cellLabel": "Out[412]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wfrac><w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>+</w><wfrac><w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wfrac><w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Cos[θ])/η0 - (A2*Cos[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), -((B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Sec[θ])/η0) + (A1*Sec[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Sin[θ])/η0 + (A2*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c91a497c-f62d-4677-97b9-ff18bc3de3e8",
+     "metadata": {
+      "cellLabel": "Out[414]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Tx</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w></w><w>Tx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{Tx/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), Ty/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), -((Tx*Tan[θ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "fc7c8b88-ab13-4814-b1f9-48c5148db1ec",
+     "metadata": {
+      "cellLabel": "Out[421]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Tx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{-((Ty*Cos[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)), (Tx*Sec[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (Ty*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "9728d1e6-65ad-4c19-b2c5-b92c5f1b2998",
+     "metadata": {
+      "cellLabel": "Out[422]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1724325078029,
+     "endTime": 1724325081725
+    },
+    "executionOrder": 381,
+    "success": true
+   }
+  },
+  {
+   "kind": 2,
+   "value": "(*write down the boundary conditions for the tangential components of the electric and magnetic fields use the cross product of z unit vector with the fields*)\neq1=FullSimplify[Cross[{0,0,1},E1[x,0]] == Cross[{0,0,1},E2[x,0]]]/.Exp[-I k0 x Sin[θ]]->1\neq2=FullSimplify[Cross[{0,0,1},E2[x,L]] == Cross[{0,0,1},E3[x,L]]]/.Exp[-I k0(L Cos[θ] + x Sin[θ])]->Exp[-I k0 L Cos[θ]]\neq3=FullSimplify[Cross[{0,0,1},H1[x,0]] == Cross[{0,0,1},H2[x,0]] - σ1.(E2[x,0])]/.Exp[-I k0 x Sin[θ]]->1\neq4=FullSimplify[Cross[{0,0,1},H2[x,L]] == Cross[{0,0,1},H3[x,L]] - σ2.(E3[x,L])]/.Exp[-I k0(L Cos[θ] + x Sin[θ])]->Exp[-I k0 L Cos[θ]]\n\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><w>A2</w><w>+</w><w>B2</w><w>-</w><w>Ry</w><w>-</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><w>A1</w></wrow><w>-</w><w>B1</w><w>+</w><w>Rx</w><w>+</w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><w>,</w><w>0</w></wrow><wb>}</wb></wrow><w class=\"symbol\"></w><wrow><w></w><wb>{</wb><wrow><w></w><w>0</w><w>,</w><w>0</w><w>,</w><w>0</w></wrow><wb>}</wb></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{A2 + B2 - Ry - Cos[φ], -A1 - B1 + Rx + Cos[θ]*Sin[φ], 0} == {0, 0, 0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "312ce6c2-ea9d-4915-87cb-2b6dad743f54",
+     "metadata": {
+      "cellLabel": "Out[423]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup></wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A2</w><w>+</w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>2</w><w></w><w>𝕚</w><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup></wrow><w>-</w><w>Ty</w></wrow><wb>)</wb></wrow></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A1</w><w>+</w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>2</w><w></w><w>𝕚</w><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup></wrow><w>-</w><w>Tx</w></wrow><wb>)</wb></wrow></wrow><w>,</w><w>0</w></wrow><wb>}</wb></wrow><w class=\"symbol\"></w><wrow><w></w><wb>{</wb><wrow><w></w><w>0</w><w>,</w><w>0</w><w>,</w><w>0</w></wrow><wb>}</wb></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{-((A2 + B2*E^((2*I)*k0*L*Cos[θ]) - Ty)/E^(I*k0*L*Cos[θ])), (A1 + B1*E^((2*I)*k0*L*Cos[θ]) - Tx)/E^(I*k0*L*Cos[θ]), 0} == {0, 0, 0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "09fe488d-c1e8-48e2-8442-39b99ba6b30c",
+     "metadata": {
+      "cellLabel": "Out[424]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wrow><w></w><wb>{</wb><wrow><w></w><wfrac><w><wrow><w></w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A1</w><w>+</w><w>B1</w></wrow><wb>)</wb></wrow><w></w><w>η0</w><w></w><w>σ1xr</w><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A1</w><w>-</w><w>B1</w><w>+</w><w>Rx</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A2</w><w>+</w><w>B2</w></wrow><wb>)</wb></wrow><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>σ1xr</w><w>-</w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A1</w><w>+</w><w>B1</w></wrow><wb>)</wb></wrow><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A2</w><w>-</w><w>B2</w><w>+</w><w>Ry</w><w>-</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><wb>)</wb></wrow></wrow><w>+</w><wrow><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A2</w><w>+</w><w>B2</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A1</w><w>+</w><w>B1</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>σ1xr</w><w>-</w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><w>A2</w><w>+</w><w>B2</w></wrow><wb>)</wb></wrow><w></w><w>σ1xr</w><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ1</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow><wb>)</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><w>0</w></wrow><wb>}</wb></wrow><w class=\"symbol\"></w><wrow><w></w><wb>{</wb><wrow><w></w><w>0</w><w>,</w><w>0</w><w>,</w><w>0</w></wrow><wb>}</wb></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{((A1 + B1)*η0*σ1xr*Cos[φ1]^2 + (A1 - B1 + Rx)*Sec[θ] - Sin[φ] + (A2 + B2)*η0*(σ1xr - I*σ1yi - σ1yr)*Cos[φ1]*Sin[φ1] + (A1 + B1)*η0*(I*σ1yi + σ1yr)*Sin[φ1]^2)/η0, (Cos[θ]*(A2 - B2 + Ry - Cos[φ]) + η0*((A2 + B2)*(I*σ1yi + σ1yr)*Cos[φ1]^2 + (A1 + B1)*(σ1xr - I*σ1yi - σ1yr)*Cos[φ1]*Sin[φ1] + (A2 + B2)*σ1xr*Sin[φ1]^2))/η0, 0} == {0, 0, 0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "61897186-31f9-4d53-a4a0-5f6ccb1604a5",
+     "metadata": {
+      "cellLabel": "Out[425]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wrow><w></w><wb>{</wb><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>Tx</w><w></w><w>η0</w><w></w><w>σ2xr</w><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>-</w><w>A1</w></wrow><w>+</w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>2</w><w></w><w>𝕚</w><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup></wrow><w>+</w><w>Tx</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>Ty</w><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w><w>+</w><w>σ2xr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>Tx</w><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow><wb>)</wb></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>-</w><w>A2</w></wrow><w>+</w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>2</w><w></w><w>𝕚</w><w></w><w>k0</w><w></w><w>L</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w></wsup></wrow><w>+</w><w>Ty</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>η0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>Ty</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>𝕚</w><w></w><w>σ1yi</w></wrow><w>+</w><w>σ1yr</w></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><w>Tx</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>σ1yi</w></wrow><w>-</w><w>σ1yr</w><w>+</w><w>σ2xr</w></wrow><wb>)</wb></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>Ty</w><w></w><w>σ2xr</w><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ2</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow><wb>)</wb></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><w>0</w></wrow><wb>}</wb></wrow><w class=\"symbol\"></w><wrow><w></w><wb>{</wb><wrow><w></w><w>0</w><w>,</w><w>0</w><w>,</w><w>0</w></wrow><wb>}</wb></wrow></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(Tx*η0*σ2xr*Cos[φ2]^2 + (-A1 + B1*E^((2*I)*k0*L*Cos[θ]) + Tx)*Sec[θ] + Ty*η0*((-I)*σ1yi - σ1yr + σ2xr)*Cos[φ2]*Sin[φ2] + Tx*η0*(I*σ1yi + σ1yr)*Sin[φ2]^2)/(E^(I*k0*L*Cos[θ])*η0), ((-A2 + B2*E^((2*I)*k0*L*Cos[θ]) + Ty)*Cos[θ] + η0*(Ty*(I*σ1yi + σ1yr)*Cos[φ2]^2 + Tx*((-I)*σ1yi - σ1yr + σ2xr)*Cos[φ2]*Sin[φ2] + Ty*σ2xr*Sin[φ2]^2))/(E^(I*k0*L*Cos[θ])*η0), 0} == {0, 0, 0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "cea56c11-9a62-468f-8f8e-28d51867bd10",
+     "metadata": {
+      "cellLabel": "Out[426]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1724325081726,
+     "endTime": 1724325088297
+    },
+    "executionOrder": 423,
+    "success": true
+   }
+  },
+  {
+   "kind": 2,
+   "value": "(*solve the system*)\nsol = Solve[{eq1, eq2, eq3, eq4}, {A1, A2, B1, B2, Rx,Ry,Tx, Ty}];",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1724325088298,
+     "endTime": 1724325103240
+    },
+    "executionOrder": 427,
+    "success": true
+   }
+  },
+  {
+   "kind": 2,
+   "value": "(* Step 1: Define the file path *)\nfilePath = \"/home/dimner/Desktop/ΔΙΠΛΩΜΑΤΙΚΗ/results_analytical\";\njsonFile = filePath <> \"/results_general_real_x1x2y_imag_y.json\";\n\n(* Simplify the expressions with assumptions *)\na1simple = Simplify[sol[[1]][[1]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\na2simple = Simplify[sol[[1]][[2]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\nb1simple = Simplify[sol[[1]][[3]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\nb2simple = Simplify[sol[[1]][[4]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\nrxsimple = Simplify[sol[[1]][[5]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\nrysimple = Simplify[sol[[1]][[6]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\ntxsimple = Simplify[sol[[1]][[7]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\ntysimple = Simplify[sol[[1]][[8]][[2]], \n  Assumptions -> {Element[{L, θ, k0, η0, φ1, φ2, σ1xr, σ1xi, σ1yr, σ1yi}, Reals], \n                  L > 0, 0 < θ < π/2, k0 > 0, η0 > 0, 0 < φ1 < 2 π, 0 < φ2 < 2 π, 0 < φ < π/2},\n  TimeConstraint -> 10];\n\n(* Create a JSON object with the desired structure *)\nresults = <|\n  \"A1\" -> ToString[a1simple, InputForm],\n  \"A2\" -> ToString[a2simple, InputForm],\n  \"B1\" -> ToString[b1simple, InputForm],\n  \"B2\" -> ToString[b2simple, InputForm],\n  \"Rx\" -> ToString[rxsimple, InputForm],\n  \"Ry\" -> ToString[rysimple, InputForm],\n  \"Tx\" -> ToString[txsimple, InputForm],\n  \"Ty\" -> ToString[tysimple, InputForm]\n|>;\n\n(* Export the JSON object to a file *)\nExport[jsonFile, results, \"JSON\"]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "cdfe30e5-8ff9-446b-8d67-75416048ff50",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d172d1ff-e9e3-450d-bc29-8bd89583d94c",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c9ee493e-d4f5-46e9-904f-89ac67d0eb1e",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "75e0e344-c5a9-41ee-952a-6b3d90cdf1b7",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "fb8f1ee3-cfc2-4ce6-80dd-44db14ee99e2",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c475a5f7-f250-4b9e-948b-ba6f5c554795",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d49e2580-5cc1-4570-9511-0018a98e7b32",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "b823d14d-592e-4c64-bae2-a06047482d46",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "eb006b0c-98fd-4f4e-b64c-53f34ce875fc",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "01c252fb-b03c-4278-ae41-27631f454cbe",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "b209f5a3-95ee-4885-af6d-3721f339bf57",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "2fe9d913-886f-4f29-a061-5da857e828d1",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "3442a613-0d92-47fd-b159-9255d02d14b2",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "5d2cb820-d782-4278-997f-5c41d3bf1024",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "b4db7bd4-8e2e-46b8-91ea-5d2dbd107847",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "d49bf7d5-2b62-4ccd-8845-bdde4ce6ff81",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "f33742c0-ac63-4d4b-ad86-2c3e0d3c6713",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "1b406dca-a838-42a6-8a2d-c0f466df7fd3",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "83d6b438-4067-487b-a1f7-93717d90a306",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "bdae8906-b7ed-44ea-8fcd-751ad0f4147c",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "2fcd85f0-3d13-4479-9319-f59f3ba563d9",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c4bbb3e8-a0a6-49e0-995b-a55497fc45f0",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "ee3dfc9c-e473-4478-8a3e-fa5dedc16eee",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">Simplify::time</span>: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "Simplify::time: \n   Time spent on a transformation exceeded 10.\n     seconds, and the transformation was aborted. Increasing the value of the\n     TimeConstraint option may improve the result of simplification.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "4d00fcff-e5ab-4c85-b9c5-f9d506a9e613",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre><span class=\"wl-message\">General::stop</span>: Further output of Simplify::time\n     will be suppressed during this calculation.</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "General::stop: Further output of Simplify::time\n     will be suppressed during this calculation.",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "713775d6-d1c2-45b7-bcc1-23ae88586387",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><w>/home/dimner/Desktop/ΔΙΠΛΩΜΑΤΙΚΗ/results_analytical/results_general_real_x1x2y_imag_y.json</w></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "\"/home/dimner/Desktop/ΔΙΠΛΩΜΑΤΙΚΗ/results_analytical/results_general_real_x1x2y_imag_y.json\"",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "7aa00e97-da4a-4b8d-8ead-858a1fc6cdac",
+     "metadata": {
+      "cellLabel": "Out[439]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {
+    "timing": {
+     "startTime": 1724325103241,
+     "endTime": 1724327936360
+    },
+    "executionOrder": 428,
+    "success": true
+   }
+  }
+ ]
+}

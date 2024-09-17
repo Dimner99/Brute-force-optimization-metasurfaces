@@ -1,0 +1,455 @@
+{
+ "cells": [
+  {
+   "kind": 1,
+   "value": " We will calculate the time-average poynting vector of the electromagnetic field in the time domain. The time-average poynting vector is given by the following formula: $$\\langle \\vec{S} \\rangle = \\frac{1}{2} \\Re(\\vec{E} \\times \\vec{H}^*)$$\nThe formula for Absorption is $$A = \\mathbf{k^{+}} \\cdot \\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{inc}}} - \\mathbf{k^{+}} \\cdot \\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{refl}}} - \\mathbf{k^{-}} \\cdot \\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{trans}}}$$\nwhere $\\mathbf{k^{+}}$ and $\\mathbf{k^{-}}$ are the wave vectors of the forward and backward waves, respectively, and $\\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{inc}}}$, $\\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{refl}}}$, and $\\langle \\mathbf{\\vec{S}} \\rangle_{\\mathbf{\\text{trans}}}$ are the time-averaged Poynting vectors of the incident, reflected, and transmitted waves, respectively. The absorption is the power absorbed per unit area of the surface.\n",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "ClearAll[\"Global`*\"]\n\nmagnitudeRule={Rx*Conjugate[Rx]->Abs[Rx]^2,Ry*Conjugate[Ry]->Abs[Ry]^2,Tx*Conjugate[Tx]->Abs[Tx]^2,Ty*Conjugate[Ty]->Abs[Ty]^2};\nsimplifyWithThetaZeroAndMagnitude[expr_] := FullSimplify[\n  expr /. θ -> 0 /. magnitudeRule\n]\n\n(*The following are the definitions of the electric field, magnetic field, and the Poynting vector*)\n\nkf={Sin[θ],0,Cos[θ]};      (*forward direction of propagation*)\nkb={Sin[θ],0,-Cos[θ]};     (*backward direction of propagation*)\nε0=8.854187817*10^-12;\nμο=4*π*10^-7;\n(* η0=Sqrt[μο/ε0]       impedance of free space *)\n",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "\n(* ClearAll[\"Global`*\"] *)\n(*now lets define the magnetic and electric field. Assume oblique incidence to the first metasurface.*)\n\nkf={Sin[θ],0,Cos[θ]};      (*forward direction of propagation*)\nkb={Sin[θ],0,-Cos[θ]};     (*backward direction of propagation*)\nE0=1;                      (*amplitude of the electric field*) \n\n(*initialize an association to store the z components of the electric field*)\nzComponents = <||>;\n\n\n(*φ is the angle between the general field and the TE mode*)\nE1inc[x_, z_] := \n  E0 * (Cos[φ] * {0, 1, 0} + Sin[φ] * {Cos[θ], 0, Sin[θ]}) * Exp[-I k0 * kf.{x, y, z}];\nE1inc[x,z]\nH1inc[x_,  z_] := FullSimplify[(1/η0)*Cross[kf,E1inc[x,z]]];    (*incident magnetic field*)\nH1inc[x,z]\n\nE1refld[x_,  z_] := E0*{Rx, Ry, Rz}*Exp[-I k0 kb.{x,y,z}];   (*reflected electric field dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kb.E1refld[x,z]/.Exp[-I k0 kb.{x,y,z}]->1;               (*equation for the orthogonality of the electric field with the k vector*)\nRd=Solve[eqq1==0,Rz][[1]][[1]][[2]];                          (*solve for Rz*)\nzComponents[\"Rz\"] = ToString[Rd,InputForm];\nE1refl[x_,z_]:=FullSimplify[E1refld[x,z]/.Rz->Rd]     (*substitute Rz in the electric field*)\nE1refl[x,z]\n\nH1refl[x_,  z_] := FullSimplify[(1/η0)*Cross[kb,E1refl[x,z]]];  (*reflected magnetic field*)\nH1refl[x,z]\nE1[x_,  z_] := E1inc[x, z] + E1refl[x, z];  (*total electric field*)\nH1[x_,  z_] := H1inc[x,  z] + H1refl[x,z];  (*total magnetic field*)\nE1[x,z]\nH1[x,z]\n\n\n(* AREA 2 LEFT OF THE FIRST METASURFACE *)\nE2fd[x_,  z_] := {A1,A2,A3}*Exp[-I k0 kf.{x,y,z}];       (* electric field in the forward direction dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kf.E2fd[x,z]/.Exp[-I k0 kf.{x,y,z}]->1;\nAd=Solve[eqq1==0,A3][[1]][[1]][[2]];\nzComponents[\"A3\"] = ToString[Ad,InputForm];\nE2f[x_,z_]:=FullSimplify[E2fd[x,z]/.A3->Ad]    \nE2bd[x_,  z_] := {B1,B2,B3}*Exp[-I k0 kb.{x,y,z}];       (*electric field in the backward direction dummy , general form, it will be restricted by the orthogonality condition*)\neqq1=kb.E2bd[x,z]/.Exp[-I k0 kb.{x,y,z}]->1;          \nBd=Solve[eqq1==0,B3][[1]][[1]][[2]];\nzComponents[\"B3\"] = ToString[Bd,InputForm];   \nE2b[x_,z_]:=FullSimplify[E2bd[x,z]/.B3->Bd]     \nE2[x_,  z_] := E2f[x, z] + E2b[x, z];                                                               \nE2[x,z]\nH2[x_,  z_] := FullSimplify[(1/η0)*Cross[kf,E2f[x, z]]] + FullSimplify[(1/η0)*Cross[kb,E2b[x, z]]];   \nH2[x,z]\n\n\n(*AREA 3 RIGHT OF THE SECOND METASURFACE*)\nE3d[x_,  z_] := {Tx,Ty,Tz}*Exp[-I k0 kf.{x,y,z}];  (*transmitted electric field dummy*)\neqq1=kf.E3d[x,z]/.Exp[-I k0 kf.{x,y,z}]->1;\nTd=Solve[eqq1==0,Tz][[1]][[1]][[2]];\nzComponents[\"Tz\"] = ToString[Td,InputForm];\nE3[x_,z_]:=FullSimplify[E3d[x,z]/.Tz->Td]\nH3[x_,z_] := FullSimplify[(1/η0)*Cross[kf,E3[x,z]]];\nE3[x,z]\nH3[x,z]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(Cos[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), Cos[φ]/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), (Sin[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ]))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "71dfbae2-f19b-402f-a98a-971bc63587db",
+     "metadata": {
+      "cellLabel": "Out[66]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{-((Cos[θ]*Cos[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)), (Cos[2*θ]*Sin[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (Cos[φ]*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "6792cacb-da7e-4de6-a492-83d7d621bab2",
+     "metadata": {
+      "cellLabel": "Out[68]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx, E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry, E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Tan[θ]}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "581c3c89-8f1b-4910-90b4-4c99f5a48738",
+     "metadata": {
+      "cellLabel": "Out[74]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Cos[θ])/η0, -((E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Sec[θ])/η0), (E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Sin[θ])/η0}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "dc203eb5-28c9-4fc9-a3f4-aa92622fc05c",
+     "metadata": {
+      "cellLabel": "Out[76]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx + (Cos[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry + Cos[φ]/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), (Sin[θ]*Sin[φ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])) + E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Tan[θ]}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "7b22560f-2aff-43b8-8af4-c6253f4d4c27",
+     "metadata": {
+      "cellLabel": "Out[79]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Rx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>+</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ry</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>φ</w><wb>]</wb></wrow></wrow><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Cos[θ])/η0 - (Cos[θ]*Cos[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), -((E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Rx*Sec[θ])/η0) + (Cos[2*θ]*Sin[φ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Ry*Sin[θ])/η0 + (Cos[φ]*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "9a344766-1cd9-408a-bffb-6996ee7ad48d",
+     "metadata": {
+      "cellLabel": "Out[80]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w>+</w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w>+</w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow></wrow><w>,</w><wrow><w></w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ])) + A1/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ])) + A2/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Tan[θ] - (A1*Tan[θ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ]))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "dd1a757d-fb62-4390-b371-435da9e965bd",
+     "metadata": {
+      "cellLabel": "Out[92]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wfrac><w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>-</w><wfrac><w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><w>B1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>+</w><wfrac><w><wrow><w></w><w>A1</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wrow><w></w><wfrac><w><wrow><w></w><w>B2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><w>𝕚</w><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>-</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>+</w><wfrac><w><wrow><w></w><w>A2</w><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{(B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Cos[θ])/η0 - (A2*Cos[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), -((B1*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Sec[θ])/η0) + (A1*Sec[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (B2*E^(I*k0*(z*Cos[θ] - x*Sin[θ]))*Sin[θ])/η0 + (A2*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "453b6212-667a-4651-b2e0-15162450f934",
+     "metadata": {
+      "cellLabel": "Out[94]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Tx</w></wrow><w>,</w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w></wrow><w>,</w><wrow><w></w><wrow><w></w><w>-</w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup></wrow><w></w><w>Tx</w><w></w><wrow><w></w><w>Tan</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{Tx/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), Ty/E^(I*k0*(z*Cos[θ] + x*Sin[θ])), -((Tx*Tan[θ])/E^(I*k0*(z*Cos[θ] + x*Sin[θ])))}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "0cffe468-7de5-487c-87a5-992b12669b61",
+     "metadata": {
+      "cellLabel": "Out[101]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><wb>{</wb><wrow><w></w><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Tx</w><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac><w>,</w><wfrac><w><wrow><w></w><wsup><w></w><w>𝕖</w><w><wrow><w></w><wrow><w></w><w>-</w><w>𝕚</w></wrow><w></w><w>k0</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wrow><w></w><w>z</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow><w>+</w><wrow><w></w><w>x</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></wrow><wb>)</wb></wrow></wrow></w></wsup><w></w><w>Ty</w><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow></wrow></w><w><w></w><w><w>η0</w></w></w></wfrac></wrow><wb>}</wb></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "{-((Ty*Cos[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)), (Tx*Sec[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0), (Ty*Sin[θ])/(E^(I*k0*(z*Cos[θ] + x*Sin[θ]))*η0)}",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e620fc1f-1b82-465b-abc2-54759602859a",
+     "metadata": {
+      "cellLabel": "Out[102]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "(*calculate the poynting of E1inc*)\nS1inc = FullSimplify[kf.\n  Cross[(1/2)*E1inc[x, z], Conjugate[H1inc[x, z]]], \n  Assumptions -> {θ > 0, θ < π/2, x ∈ Reals, z ∈ Reals, y ∈ Reals, k0 ∈ Reals, θ ∈ Reals,η0 > 0,φ ∈ Reals,φ > 0,φ < π/2}\n]/.magnitudeRule\n\n\nPrint[\"Incidence Power for theta=0:\"]\n\n(*calculate the poynting of E1*)\nsimplifyWithThetaZeroAndMagnitude[S1inc]\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><w>3</w><w>+</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>4</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w>+</w><wrow><w></w><w>2</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>φ</w></wrow><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w></w><w><wrow><w></w><w>8</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(3 + Cos[4*θ] + 2*Cos[2*φ]*Sin[2*θ]^2)/(8*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "321075dd-6862-4514-bcc8-fd3e8f679ef5",
+     "metadata": {
+      "cellLabel": "Out[103]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre>Incidence Power for theta=0:\n</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "\"Incidence Power for theta=0:\\n\"",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "6299de95-d008-4f06-bde9-905760bf73db",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><w>1</w></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "1/(2*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "ee552b5b-166f-42b3-87b7-16ba17c774b1",
+     "metadata": {
+      "cellLabel": "Out[105]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "S1refl = FullSimplify[kb.\n  Cross[(1/2)*E1refl[x, z], Conjugate[H1refl[x, z]]], \n  Assumptions -> {θ > 0, θ < π/2, x ∈ Reals, z ∈ Reals, y ∈ Reals, k0 ∈ Reals, θ ∈ Reals, η0 > 0,φ ∈ Reals,φ > 0,φ < π/2}\n]/.magnitudeRule\n\n\nPrint[\"Reflected Power for theta=0:\"]\n\nsimplifyWithThetaZeroAndMagnitude[S1refl]",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ry</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Rx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(Abs[Ry]^2 + Abs[Rx]^2*Sec[θ]^2)/(2*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "020cdde0-bcff-449d-97e9-3dc2b5dc7cde",
+     "metadata": {
+      "cellLabel": "Out[106]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre>Reflected Power for theta=0:\n</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "\"Reflected Power for theta=0:\\n\"",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "6e5ca5b2-4aae-40cc-be86-9a2fa87a27ec",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Rx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ry</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(Abs[Rx]^2 + Abs[Ry]^2)/(2*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "8c1bc847-393f-4582-be6a-f7e56b8d698b",
+     "metadata": {
+      "cellLabel": "Out[108]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "S1trans= FullSimplify[kf.\n  Cross[(1/2)*E3[x, z], Conjugate[H3[x, z]]], \n  Assumptions -> {θ > 0, θ < π/2, x ∈ Reals, z ∈ Reals, y ∈ Reals, k0 ∈ Reals, θ ∈ Reals, η0 > 0,φ ∈ Reals,φ > 0,φ < π/2}\n] /. magnitudeRule\n\nPrint[\"Transmitted Power for theta=0:\"]\nsimplifyWithThetaZeroAndMagnitude[S1trans]\n\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ty</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Tx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w></w><wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(Abs[Ty]^2 + Abs[Tx]^2*Sec[θ]^2)/(2*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "491bb608-8361-4b26-a7aa-a20dcdd60afe",
+     "metadata": {
+      "cellLabel": "Out[109]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre>Transmitted Power for theta=0:\n</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "\"Transmitted Power for theta=0:\\n\"",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "adec95c1-8174-4804-8d28-9465f3c730ab",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Tx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ty</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(Abs[Tx]^2 + Abs[Ty]^2)/(2*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "231e1bc8-6125-4620-b5db-50e57b249e97",
+     "metadata": {
+      "cellLabel": "Out[111]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "Absorption=(S1inc-S1refl-S1trans);\nAbssimple=FullSimplify[Absorption]/.magnitudeRule\n\nPrint[\"Absorption Power for theta=0:\"]\nsimplifyWithThetaZeroAndMagnitude[Absorption]\n",
+   "languageId": "wolfram",
+   "outputs": [
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wfrac><w><wrow><w></w><w>3</w><w>-</w><wrow><w></w><w>4</w><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ry</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>-</w><wrow><w></w><w>4</w><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ty</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>4</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w>-</w><wrow><w></w><w>4</w><w></w><wrow><w></w><wb>(</wb><wrow><w></w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Rx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Tx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><wb>)</wb></wrow><w></w><wsup><w></w><wrow><w></w><w>Sec</w><wrow><w></w><wb>[</wb><w>θ</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow><w>+</w><wrow><w></w><w>2</w><w></w><wrow><w></w><w>Cos</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>φ</w></wrow><wb>]</wb></wrow></wrow><w></w><wsup><w></w><wrow><w></w><w>Sin</w><wrow><w></w><wb>[</wb><wrow><w></w><w>2</w><w></w><w>θ</w></wrow><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></wrow></w><w><w></w><w><wrow><w></w><w>8</w><w></w><w>η0</w></wrow></w></w></wfrac></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "(3 - 4*Abs[Ry]^2 - 4*Abs[Ty]^2 + Cos[4*θ] - 4*(Abs[Rx]^2 + Abs[Tx]^2)*Sec[θ]^2 + 2*Cos[2*φ]*Sin[2*θ]^2)/(8*η0)",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "c4b44457-40eb-4849-b050-512526336616",
+     "metadata": {
+      "cellLabel": "Out[113]= ",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<pre>Absorption Power for theta=0:\n</pre>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "\"Absorption Power for theta=0:\\n\"",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "4e13242c-7349-443b-90a7-67c4efcf23f3",
+     "metadata": {
+      "cellLabel": "",
+      "isBoxData": false
+     }
+    },
+    {
+     "items": [
+      {
+       "data": "<div class=\"wexpr\"><wrow><w></w><w>-</w><wfrac><w><wrow><w></w><wrow><w></w><w>-</w><w>1</w></wrow><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Rx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ry</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Tx</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup><w>+</w><wsup><w></w><wrow><w></w><w>Abs</w><wrow><w></w><wb>[</wb><w>Ty</w><wb>]</wb></wrow></wrow><w><w>2</w></w></wsup></wrow></w><w><w></w><w><wrow><w></w><w>2</w><w></w><w>η0</w></wrow></w></w></wfrac></wrow></div>",
+       "mime": "x-application/wolfram-language-html"
+      },
+      {
+       "data": "-1/2*(-1 + Abs[Rx]^2 + Abs[Ry]^2 + Abs[Tx]^2 + Abs[Ty]^2)/η0",
+       "mime": "text/plain"
+      }
+     ],
+     "id": "e5855ad0-bc87-4173-b012-4ebf6370e717",
+     "metadata": {
+      "cellLabel": "Out[115]= ",
+      "isBoxData": false
+     }
+    }
+   ],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 2,
+   "value": "ClearAll[\"Global`*\"]\nnorm=(11*Pi)/(60*η0);\nexpr=((3 - 4*Abs[Ry]^2 - 4*Abs[Ty]^2 + Cos[4*θ] - 4*(Abs[Rx]^2 + Abs[Tx]^2)*Sec[θ]^2 + 2*Cos[2*φ]*Sin[2*θ]^2)/(8*η0))*Cos[θ]/norm\n\n(* Step 1: Substitute Rx, Ry, Tx, Ty with 0 *)\n\n(* Step 1: Substitute Rx, Ry, Tx, Ty with 0 *)\nsimplifiedExpr = expr /. {Rx -> 0, Ry -> 0, Tx -> 0, Ty -> 0};\n\n(* Step 2: Simplify the expression *)\nsimplifiedExpr = Simplify[simplifiedExpr];\n\n(* Step 3: Perform the double integral with respect to θ and φ *)\ndoubleIntegral = FullSimplify[Integrate[simplifiedExpr, {θ, 0, π/2}, {φ, 0, π/2}]];\n\ndoubleIntegral",
+   "languageId": "wolfram",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  },
+  {
+   "kind": 1,
+   "value": "\n$$\n\\mathcal{A} = \\frac{15}{22 π} \\cos(\\theta)\\left( 3 - 4\\left(\\left| R_y \\right|^2 +\\left| T_y \\right|^2\\right) +\\cos(4\\theta)- 4\\left( \\left| R_x \\right|^2 + \\left| T_x \\right|^2 \\right) \\sec^2(\\theta) +2\\cos(2\\phi)\\sin^{2}(2\\theta)\\right)\n$$",
+   "languageId": "markdown",
+   "outputs": [],
+   "metadata": {},
+   "executionSummary": {}
+  }
+ ]
+}
